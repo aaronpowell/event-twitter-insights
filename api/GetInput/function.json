@@ -1,0 +1,42 @@
+{
+  "bindings": [
+    {
+      "name": "input",
+      "type": "queueTrigger",
+      "direction": "in",
+      "queueName": "tweets",
+      "connection": "QueueSource"
+    },
+    {
+      "name": "sentimentDoc",
+      "type": "cosmosDB",
+      "databaseName": "EventAnalysis",
+      "collectionName": "PowerfulDevs",
+      "createIfNotExists": true,
+      "connectionStringSetting": "COSMOSDB",
+      "direction": "out",
+      "partitionKey": "/type"
+    },
+    {
+      "name": "keyPhrasesDoc",
+      "type": "cosmosDB",
+      "databaseName": "EventAnalysis",
+      "collectionName": "PowerfulDevs",
+      "createIfNotExists": true,
+      "connectionStringSetting": "COSMOSDB",
+      "direction": "out",
+      "partitionKey": "/type"
+    },
+    {
+      "name": "rawDoc",
+      "type": "cosmosDB",
+      "databaseName": "EventAnalysis",
+      "collectionName": "PowerfulDevs",
+      "createIfNotExists": true,
+      "connectionStringSetting": "COSMOSDB",
+      "direction": "out",
+      "partitionKey": "/type"
+    }
+  ],
+  "scriptFile": "../dist/GetInput/index.js"
+}
