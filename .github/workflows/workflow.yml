@@ -37,7 +37,7 @@ jobs:
         uses: Azure/functions-action@v1
         with:
           app-name: aapowellpowerfuldev-backend-backup
-          package: .
+          package: ./backend
 
       # Azure logout
       - name: logout
