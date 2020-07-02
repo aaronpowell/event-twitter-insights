@@ -1,0 +1,27 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": ["get"]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    },
+    {
+      "name": "documents",
+      "type": "cosmosDB",
+      "databaseName": "EventAnalysis",
+      "collectionName": "PowerfulDevs",
+      "createIfNotExists": true,
+      "connectionStringSetting": "COSMOSDB",
+      "direction": "in",
+      "sqlQuery": "SELECT * FROM d WHERE d.type = 'keyPhrases'"
+    }
+  ],
+  "scriptFile": "../dist/GetKeyPhrases/index.js"
+}
