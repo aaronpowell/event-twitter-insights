@@ -23,14 +23,22 @@ type QueueInput = {
 
 const queueTrigger: AzureFunction = async function (
   context: Context,
-  input: QueueInput
+  input: QueueInput | string
 ): Promise<void> {
   context.log("Processing input", input);
+
+  let parsedInput: QueueInput
+  if (typeof input === 'string') {
+    parsedInput = JSON.parse(input)
+  } else {
+    parsedInput = input
+  }
+
   const endpoint = process.env.AiEndpoint;
   const key = process.env.AiApiKey;
   const client = new TextAnalyticsClient(endpoint, new AzureKeyCredential(key));
 
-  const text = input.tweet.originalText || input.tweet.text;
+  const text = parsedInput.tweet.originalText || parsedInput.tweet.text;
 
   const [sentimentResult, keyPhraseResult] = await Promise.all([
     client.analyzeSentiment([text]),
@@ -41,9 +49,9 @@ const queueTrigger: AzureFunction = async function (
   context.log("Response from key phrase analysis", keyPhraseResult);
 
   context.bindings.sentimentDoc = {
-    id: `sentiment-${input.tweet.id}`,
+    id: `sentiment-${parsedInput.tweet.id}`,
     type: "sentiment",
-    tweetId: input.tweet.id,
+    tweetId: parsedInput.tweet.id,
     tweet: text,
     sentiment: sentimentResult.map((doc: AnalyzeSentimentSuccessResult) => {
       return {
@@ -55,9 +63,9 @@ const queueTrigger: AzureFunction = async function (
   };
 
   context.bindings.keyPhrasesDoc = {
-    id: `keyPhrases-${input.tweet.id}`,
+    id: `keyPhrases-${parsedInput.tweet.id}`,
     type: "keyPhrases",
-    tweetId: input.tweet.id,
+    tweetId: parsedInput.tweet.id,
     tweet: text,
     keyPhrases: keyPhraseResult
       .map((doc: ExtractKeyPhrasesSuccessResult) => doc.keyPhrases)
@@ -65,8 +73,8 @@ const queueTrigger: AzureFunction = async function (
   };
 
   context.bindings.rawDoc = {
-    ...input.tweet,
-    id: `${input.tweet.id}`,
+    ...parsedInput.tweet,
+    id: `${parsedInput.tweet.id}`,
     type: "raw",
   };
 };
