@@ -13,6 +13,7 @@ type QueueInput = {
     user: string;
     url: string;
     id: string;
+    originalText: string;
   };
   location: {
     lat: string;
@@ -29,37 +30,21 @@ const queueTrigger: AzureFunction = async function (
   const key = process.env.AiApiKey;
   const client = new TextAnalyticsClient(endpoint, new AzureKeyCredential(key));
 
+  const text = input.tweet.originalText || input.tweet.text;
+
   const [sentimentResult, keyPhraseResult] = await Promise.all([
-    client.analyzeSentiment([input.tweet.text]),
-    client.extractKeyPhrases([input.tweet.text]),
+    client.analyzeSentiment([text]),
+    client.extractKeyPhrases([text]),
   ]);
 
   context.log("Response from sentiment analysis", sentimentResult);
   context.log("Response from key phrase analysis", keyPhraseResult);
 
-  const store = {
-    id: `${input.id}-${input.tweet.id}`,
-    type: "sentiment",
-    tweetId: input.tweet.id,
-    user: input.tweet.user,
-    tweet: input.tweet.text,
-    sentiment: sentimentResult.map((doc: AnalyzeSentimentSuccessResult) => {
-      return {
-        sentiment: doc.sentiment,
-        sentences: doc.sentences,
-        confidence: doc.confidenceScores,
-      };
-    }),
-    keyPrases: keyPhraseResult
-      .map((doc: ExtractKeyPhrasesSuccessResult) => doc.keyPhrases)
-      .reduce((arr, kp) => arr.concat(kp), []),
-  };
-
   context.bindings.sentimentDoc = {
     id: `sentiment-${input.tweet.id}`,
     type: "sentiment",
     tweetId: input.tweet.id,
-    tweet: input.tweet.text,
+    tweet: text,
     sentiment: sentimentResult.map((doc: AnalyzeSentimentSuccessResult) => {
       return {
         sentiment: doc.sentiment,
@@ -73,7 +58,7 @@ const queueTrigger: AzureFunction = async function (
     id: `keyPhrases-${input.tweet.id}`,
     type: "keyPhrases",
     tweetId: input.tweet.id,
-    tweet: input.tweet.text,
+    tweet: text,
     keyPhrases: keyPhraseResult
       .map((doc: ExtractKeyPhrasesSuccessResult) => doc.keyPhrases)
       .reduce((arr, kp) => arr.concat(kp), []),
