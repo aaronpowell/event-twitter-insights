@@ -19,7 +19,7 @@ function App() {
       const result = await fetch(
         `${
           process.env.NODE_ENV === "development"
-            ? window.location.href.replace("-3000", "-7071")
+            ? window.location.href.replace("3000", "7071")
             : "/"
         }api/GetKeyPhrases`
       );

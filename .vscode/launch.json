@@ -3,9 +3,23 @@
   "configurations": [
     {
       "command": "npm start",
-      "name": "Run npm start",
+      "name": "Run web",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "command": "npm start",
+      "name": "Run api",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}/api"
+    },
+    {
+      "command": "npm start",
+      "name": "Run backend",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}/backend"
     },
     {
       "name": "Attach to Node Functions",
@@ -13,6 +27,12 @@
       "request": "attach",
       "port": 9229,
       "preLaunchTask": "func: host start"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Run All",
+      "configurations": ["Run api", "Run backend", "Run web"]
     }
   ]
 }
