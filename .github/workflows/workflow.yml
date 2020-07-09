@@ -1,7 +1,3 @@
-# Node.js Function App to Windows on Azure
-# Build a Node.js function app and deploy it to Azure as a Windows function app.
-# Add steps that build code, save build artifacts, deploy, and more:
-
 on:
   push:
     branches:
@@ -15,10 +11,6 @@ jobs:
     steps:
       # checkout the repo
       - uses: actions/checkout@master
-
-      - uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS_88292c7b }}
 
       - name: "Run npm"
         shell: bash
@@ -38,8 +30,4 @@ jobs:
         with:
           app-name: aapowellpowerfuldev-backend-backup
           package: ./backend
-
-      # Azure logout
-      - name: logout
-        run: |
-          az logout
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS_88292C7B }
