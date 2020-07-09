@@ -30,4 +30,4 @@ jobs:
         with:
           app-name: aapowellpowerfuldev-backend-backup
           package: ./backend
-          publish-profile: ${{ secrets.AZURE_CREDENTIALS_88292C7B }
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS_88292C7B }}
