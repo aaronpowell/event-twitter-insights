@@ -25,10 +25,12 @@ function App() {
       );
       const json: KeyPhraseResult = await result.json();
 
+      const tags = Object.keys(json).map((key) => {
+        return { value: key, count: json[key] };
+      });
+
       setPhrases(
-        Object.keys(json).map((key) => {
-          return { value: key, count: json[key] };
-        })
+        tags.sort((x, y) => (x.count > y.count ? -1 : 1)).slice(0, 100)
       );
     };
 
