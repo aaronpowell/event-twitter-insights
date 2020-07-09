@@ -5,6 +5,7 @@ import {
   AnalyzeSentimentSuccessResult,
   ExtractKeyPhrasesSuccessResult,
 } from "@azure/ai-text-analytics";
+import { AIResult } from "../types";
 
 type QueueInput = {
   id: string;
@@ -27,11 +28,11 @@ const queueTrigger: AzureFunction = async function (
 ): Promise<void> {
   context.log("Processing input", input);
 
-  let parsedInput: QueueInput
-  if (typeof input === 'string') {
-    parsedInput = JSON.parse(input)
+  let parsedInput: QueueInput;
+  if (typeof input === "string") {
+    parsedInput = JSON.parse(input);
   } else {
-    parsedInput = input
+    parsedInput = input;
   }
 
   const endpoint = process.env.AiEndpoint;
@@ -77,6 +78,16 @@ const queueTrigger: AzureFunction = async function (
     id: `${parsedInput.tweet.id}`,
     type: "raw",
   };
+
+  const results = {
+    keyPhrases: context.bindings.keyPhrasesDoc.keyPhrases,
+    sentimentLabel: context.bindings.sentimentDoc.sentiment[0].sentiment,
+    sentimentRating: context.bindings.sentimentDoc.sentiment[0].confidence,
+  } as AIResult;
+
+  context.bindings.queuedResults = results;
+
+  context.done();
 };
 
 export default queueTrigger;

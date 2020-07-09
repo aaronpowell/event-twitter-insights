@@ -36,6 +36,13 @@
       "connectionStringSetting": "COSMOSDB",
       "direction": "out",
       "partitionKey": "/type"
+    },
+    {
+      "type": "queue",
+      "direction": "out",
+      "name": "queuedResults",
+      "queueName": "results",
+      "connection": "QueueSource"
     }
   ],
   "scriptFile": "../dist/GetInput/index.js"
