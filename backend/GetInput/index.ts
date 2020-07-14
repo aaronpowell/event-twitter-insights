@@ -6,6 +6,7 @@ import {
   ExtractKeyPhrasesSuccessResult,
 } from "@azure/ai-text-analytics";
 import { AIResult } from "../types";
+import { processKeyPhrases, processSentiment } from "./cognitiveServices";
 
 type QueueInput = {
   id: string;
@@ -30,7 +31,12 @@ const queueTrigger: AzureFunction = async function (
 
   let parsedInput: QueueInput;
   if (typeof input === "string") {
-    parsedInput = JSON.parse(input);
+    try {
+      parsedInput = JSON.parse(input.split("\n").join(" "));
+    } catch (e) {
+      console.error(e);
+      console.error(input);
+    }
   } else {
     parsedInput = input;
   }
@@ -42,36 +48,12 @@ const queueTrigger: AzureFunction = async function (
   const text = parsedInput.tweet.originalText || parsedInput.tweet.text;
 
   const [sentimentResult, keyPhraseResult] = await Promise.all([
-    client.analyzeSentiment([text]),
-    client.extractKeyPhrases([text]),
+    processSentiment(client, parsedInput.tweet.id, parsedInput.tweet.user, parsedInput.tweet.url, text, context.log),
+    processKeyPhrases(client, parsedInput.tweet.id, parsedInput.tweet.user, parsedInput.tweet.url, text, context.log),
   ]);
 
-  context.log("Response from sentiment analysis", sentimentResult);
-  context.log("Response from key phrase analysis", keyPhraseResult);
-
-  context.bindings.sentimentDoc = {
-    id: `sentiment-${parsedInput.tweet.id}`,
-    type: "sentiment",
-    tweetId: parsedInput.tweet.id,
-    tweet: text,
-    sentiment: sentimentResult.map((doc: AnalyzeSentimentSuccessResult) => {
-      return {
-        sentiment: doc.sentiment,
-        sentences: doc.sentences,
-        confidence: doc.confidenceScores,
-      };
-    }),
-  };
-
-  context.bindings.keyPhrasesDoc = {
-    id: `keyPhrases-${parsedInput.tweet.id}`,
-    type: "keyPhrases",
-    tweetId: parsedInput.tweet.id,
-    tweet: text,
-    keyPhrases: keyPhraseResult
-      .map((doc: ExtractKeyPhrasesSuccessResult) => doc.keyPhrases)
-      .reduce((arr, kp) => arr.concat(kp), []),
-  };
+  context.bindings.sentimentDoc = sentimentResult;
+  context.bindings.keyPhrasesDoc = keyPhraseResult;
 
   context.bindings.rawDoc = {
     ...parsedInput.tweet,
@@ -80,12 +62,15 @@ const queueTrigger: AzureFunction = async function (
   };
 
   const results = {
+    id: parsedInput.tweet.id,
     keyPhrases: context.bindings.keyPhrasesDoc.keyPhrases,
     sentimentLabel: context.bindings.sentimentDoc.sentiment[0].sentiment,
     sentimentRating: context.bindings.sentimentDoc.sentiment[0].confidence,
   } as AIResult;
 
   context.bindings.queuedResults = results;
+
+  context.log(results);
 
   context.done();
 };

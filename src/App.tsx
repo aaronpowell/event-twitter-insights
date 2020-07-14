@@ -40,7 +40,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        {!phrases && <p>Just fetching data, please wait</p>}
+        {!phrases && <p>Fetching data, please wait</p>}
         {phrases && <TagCloud minSize={12} maxSize={35} tags={phrases} />}
       </header>
     </div>
