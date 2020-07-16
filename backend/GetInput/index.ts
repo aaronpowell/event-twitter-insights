@@ -2,8 +2,6 @@ import { AzureFunction, Context } from "@azure/functions";
 import {
   TextAnalyticsClient,
   AzureKeyCredential,
-  AnalyzeSentimentSuccessResult,
-  ExtractKeyPhrasesSuccessResult,
 } from "@azure/ai-text-analytics";
 import { AIResult } from "../types";
 import { processKeyPhrases, processSentiment } from "./cognitiveServices";
